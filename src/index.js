@@ -1,6 +1,6 @@
 const app = document.getElementById('app');
 const playButton = document.getElementById('play');
-const playByChordsButton = document.getElementById('play-by-chords');
+const selectedSongElement = document.getElementById('selected-song');
 
 // Notes with their frequencies
 const notes = {
@@ -22,6 +22,21 @@ const audioContext = new AudioContext({
   sampleRate: 768000
 });
 
+const songs = {
+  'NF-Time': [
+    { chord: 'G#', octave: 2, scale: 'minor' },
+    { chord: 'C', octave: 3, scale: 'minor' },
+    { chord: 'A#', octave: 2, scale: 'major' },
+    { chord: 'F', octave: 2, scale: 'minor' },
+  ],
+  'NF-How-Could-You-Leave-Us': [
+    { chord: 'F', octave: 3, scale: 'major' },
+    { chord: 'A', octave: 3, scale: 'minor' },
+    { chord: 'G', octave: 3, scale: 'major' },
+    { chord: 'F', octave: 3, scale: 'major' },
+  ]
+}
+
 const gainNode = audioContext.createGain();
 gainNode.connect(audioContext.destination);
 gainNode.gain.value = 0.2;
@@ -30,72 +45,28 @@ const sineTerms = new Float32Array([0, 0, 0, 0, 0]);
 const cosineTerms = new Float32Array(sineTerms.length);
 const waveForm = audioContext.createPeriodicWave(cosineTerms, sineTerms);
 
-playByChordsButton.addEventListener('click', async () => {
-  const octave = 3;
-  await playChord('F', octave, 'major');
-  await playChord('A', octave, 'minor');
-  await playChord('G', octave, 'major');
-  await playChord('F', octave, 'major');
-});
-
 playButton.addEventListener('click', async () => {
-  await playNote('F', 2);
-  // await delay(3000);
-  await playNote('A', 2);
-  // await delay(3000);
-  await playNote('C', 2);
-  
-  // F
-  // playNote('F', 2);
-  // playNote('A', 2);
-  // playNote('C', 3);
-
-  // await delay(3000);
-  // // A
-  // playNote('A', 2);
-  // playNote('C', 3);
-  // playNote('E', 3);
-
-  // await delay(3000)
-
-  // // G
-  // playNote('G', 2);
-  // playNote('B', 2);
-  // playNote('D', 3);
-  
-  // await delay(3000)
-  
-  // // F
-  // playNote('F', 2);
-  // playNote('A', 2);
-  // playNote('C', 3);
-
-
-  // await playNote('F', 2);
-  // await playNote('C', 3);
-  // await playNote('G', 2);
-  // await playNote('F', 2);
-  // await playNote('E', 4);
-  // await playNote('F', 4);
-  // await playNote('G', 4);
-  // await playNote('A', 4);
-  // await playNote('B', 4);
+  playSong(selectedSongElement.value);
 })
 
 function delay(ms = 500) {
   return new Promise((res) => setTimeout(res,ms))
 }
 
-function getPeriodicWave() {
-  // const n = 2;
-  const real = new Float32Array([0, 0]);
-  const imag = new Float32Array([0, 1]);
+async function playSong(songName) {
+  const songToPlay = songs[songName];
   
-  // for(var x = 1; x < n; x+=2) {
-  //   imag[x] = 1.0 / (Math.PI*x);
-  // }
+  if (songToPlay) {
+    for (let i = 0; i < songToPlay.length; i++) {
+      const chord = songToPlay[i].chord;
+      const octave = songToPlay[i].octave;
+      const scale = songToPlay[i].scale;
 
-  return audioContext.createPeriodicWave(real, imag);
+      await playChord(chord, octave, scale);
+    }
+  } else {
+    console.log('Song not found');
+  }
 }
 
 async function playChord(chord, octave, scale, time = 3000) {
