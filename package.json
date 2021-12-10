@@ -1,0 +1,15 @@
+{
+  "name": "piano.pavelkeyzik.com",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "parcel src/index.html",
+    "build": "parcel build src/index.html"
+  },
+  "keywords": [],
+  "author": "Pavel Keyzik",
+  "license": "ISC",
+  "dependencies": {
+    "parcel": "^2.0.1"
+  }
+}
