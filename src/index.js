@@ -46,7 +46,14 @@ const cosineTerms = new Float32Array(sineTerms.length);
 const waveForm = audioContext.createPeriodicWave(cosineTerms, sineTerms);
 
 playButton.addEventListener('click', async () => {
-  playSong(selectedSongElement.value);
+  playButton.disabled = true;
+  const savedText = playButton.innerText;
+  playButton.innerText = 'Playing...';
+  
+  await playSong(selectedSongElement.value);
+  
+  playButton.innerText = savedText;
+  playButton.disabled = false;
 })
 
 function delay(ms = 500) {
