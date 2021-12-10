@@ -147,31 +147,3 @@ async function playChord(chord, octave, scale, time = 3000) {
   oscillatorNode2.stop();
   oscillatorNode3.stop();
 }
-
-async function playNote(note, octave, time = 2000) {
-  const frequency = notes[note][octave];
-
-  const osc = audioContext.createOscillator();
-
-  osc.frequency.value = frequency;
-
-  const attackTime = 0.2;
-  const decayTime = 0.3;
-  const sustainLevel = 0.7;
-  const releaseTime = 0.2;
-
-  const now = audioContext.currentTime;
-  const noteGain = audioContext.createGain();
-  noteGain.gain.setValueAtTime(0, 0);
-  noteGain.gain.linearRampToValueAtTime(time / 1000, now + attackTime);
-  noteGain.gain.linearRampToValueAtTime(sustainLevel, now + attackTime + decayTime);
-  noteGain.gain.setValueAtTime(sustainLevel, now + (time / 1000) - releaseTime);
-  noteGain.gain.linearRampToValueAtTime(0, now + (time / 1000));
-
-  osc.connect(noteGain);
-  noteGain.connect(gainNode);
-
-  osc.start()
-  await delay(time);
-  osc.stop();
-}
