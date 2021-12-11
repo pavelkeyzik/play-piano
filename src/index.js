@@ -1,4 +1,4 @@
-const app = document.getElementById('app');
+const keyboard = document.getElementById('keyboard');
 const playButton = document.getElementById('play');
 const selectedSongElement = document.getElementById('selected-song');
 
@@ -14,7 +14,7 @@ const notes = {
   'G': [24.50, 49.00, 98.00, 196.00, 392, 783.99, 1567.98, 3135.96, 6271.93],
   'G#': [25.96, 51.91, 103.83, 207.65, 415.30, 830.61, 1661.22, 3322.44, 6644.88],
   'A': [27.50, 55.00, 110.00, 220.00, 440, 880.00, 1760.00, 3520.00, 7040.00],
-  'A#': [29.14, 58.27, 116.54, 233.08, 366.16, 932.33, 1864.66, 3729.31, 7458.62],
+  'A#': [29.14, 58.27, 116.54, 233.08, 466.16, 932.33, 1864.66, 3729.31, 7458.62],
   'B': [30.87, 61.74, 123.47, 246.94, 493.88, 987.77, 1975.53, 3951.07, 7902.13]
 };
 
@@ -34,12 +34,30 @@ const songs = {
     { chord: 'A', octave: 3, scale: 'minor' },
     { chord: 'G', octave: 3, scale: 'major' },
     { chord: 'F', octave: 3, scale: 'major' },
+  ],
+  'Requiem-For-A-Dream': [
+    { chord: 'A#', octave: 4 },
+    { chord: 'A', octave: 4 },
+    { chord: 'G', octave: 4 },
+    { chord: 'D', octave: 4 },
+    { chord: 'A#', octave: 4 },
+    { chord: 'A', octave: 4 },
+    { chord: 'G', octave: 4 },
+    { chord: 'D', octave: 4 },
+    { chord: 'A#', octave: 4 },
+    { chord: 'A', octave: 4 },
+    { chord: 'G', octave: 4 },
+    { chord: 'D', octave: 4 },
+    { chord: 'C', octave: 5 },
+    { chord: 'A#', octave: 4 },
+    { chord: 'A', octave: 4 },
+    { chord: 'A#', octave: 4 },
   ]
 }
 
 const gainNode = audioContext.createGain();
 gainNode.connect(audioContext.destination);
-gainNode.gain.value = 0.2;
+gainNode.gain.value = 1;
 
 const sineTerms = new Float32Array([0, 0, 0, 0, 0]);
 const cosineTerms = new Float32Array(sineTerms.length);
@@ -101,11 +119,14 @@ async function playChord(chord, octave, scale, time = 3000) {
     note2Octave = (indexOfFirstNote + 3) > 11 ? octave + 1 : octave;
     note3 = allNotes[(indexOfFirstNote + 3 + 4) % 12]; // 2 Steps
     note3Octave = (indexOfFirstNote + 3 + 4) > 11 ? octave + 1 : octave;
+  } else {
+    await playNote(chord, octave, 500);
+    return;
   }
 
   const attackTime = 0;
   const decayTime = 0;
-  const sustainLevel = 1;
+  const sustainLevel = 0;
   const releaseTime = 1;
 
   const now = audioContext.currentTime;
@@ -147,3 +168,70 @@ async function playChord(chord, octave, scale, time = 3000) {
   oscillatorNode2.stop();
   oscillatorNode3.stop();
 }
+
+async function playNote(note, octave, time = 2000) {
+  const frequency = notes[note][octave];
+
+  const osc = audioContext.createOscillator();
+
+  osc.frequency.value = frequency;
+
+  const attackTime = 0;
+  const decayTime = 0.3;
+  const sustainLevel = 0.7;
+  const releaseTime = 0.2;
+
+  const now = audioContext.currentTime;
+  const noteGain = audioContext.createGain();
+  noteGain.gain.setValueAtTime(0, 0);
+  noteGain.gain.linearRampToValueAtTime(time / 1000, now + attackTime);
+  noteGain.gain.linearRampToValueAtTime(sustainLevel, now + attackTime + decayTime);
+  noteGain.gain.setValueAtTime(sustainLevel, now + (time / 1000) - releaseTime);
+  noteGain.gain.linearRampToValueAtTime(0, now + (time / 1000));
+
+  osc.connect(noteGain);
+  noteGain.connect(gainNode);
+
+  osc.start()
+  await delay(time);
+  osc.stop();
+}
+
+function renderNotes() {
+  const allNotes = Object.keys(notes);
+
+    for (let currentOctave = 3; currentOctave < 6; currentOctave++) {
+      for (let i = 0; i < 12; i++) {
+
+    const div = document.createElement('div');
+    div.classList.add('note-key');
+    const noteName = allNotes[i];
+    
+    if (noteName.includes('#')) {
+      div.classList.add('sharp');
+    } else {
+      div.classList.add('regular');
+      div.innerText = noteName + currentOctave;
+    }
+
+    div.dataset.note = noteName;
+    div.dataset.octave = currentOctave;
+
+    keyboard.appendChild(div);
+  }
+
+  }
+}
+
+keyboard.addEventListener('click', (event) => {
+  const pressedNote = {
+    note: event.target.dataset ? event.target.dataset.note : null,
+    octave: event.target.dataset ? event.target.dataset.octave : null,
+  }
+
+  if (pressedNote.note && pressedNote.octave) {
+    playNote(pressedNote.note, Number(pressedNote.octave), 500);
+  }
+})
+
+renderNotes();

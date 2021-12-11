@@ -1,0 +1,27 @@
+.keyboard {
+  display: flex;
+  overflow: auto;
+}
+
+.note-key {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.regular {
+  width: 30px;
+  height: 180px;
+  border: 1px solid;
+}
+
+.sharp {
+  position: relative;
+  width: 18px;
+  height: 80px;
+  background: #000;
+  color: white;
+  margin: 0 calc(18px / 2 * -1);
+  z-index: 4;
+}
