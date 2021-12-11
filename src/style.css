@@ -1,3 +1,7 @@
+* {
+  box-sizing: border-box;
+}
+
 .keyboard {
   display: flex;
   overflow: auto;
@@ -8,12 +12,17 @@
   flex-direction: column;
   justify-content: flex-end;
   align-items: center;
+  border: 1px solid #000;
 }
 
 .regular {
   width: 30px;
   height: 180px;
-  border: 1px solid;
+}
+
+.sharp.active,
+.regular.active {
+  background: red;
 }
 
 .sharp {
