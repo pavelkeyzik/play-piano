@@ -254,14 +254,18 @@ function renderNotes() {
   }
 }
 
-keyboard.addEventListener("click", (event) => {
+keyboard.addEventListener("click", async (event) => {
   const pressedNote = {
     note: event.target.dataset ? event.target.dataset.note : null,
     octave: event.target.dataset ? event.target.dataset.octave : null,
   };
 
   if (pressedNote.note && pressedNote.octave) {
-    playNote(pressedNote.note, Number(pressedNote.octave), 500);
+    activeNotes.push({ note: pressedNote.note, octave: Number(pressedNote.octave) });
+    renderNotes();
+    await playNote(pressedNote.note, Number(pressedNote.octave), 500);
+    activeNotes = [];
+    renderNotes();
   }
 });
 
